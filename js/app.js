@@ -1,0 +1,17 @@
+import { initializeState } from './state.js';
+import { initializeNavigation, render } from './ui.js';
+import { initializeBackup } from './backup.js';
+import { initializeBusiness } from './business.js';
+import { initializeClients } from './clients.js';
+import { initializeProducts } from './products.js';
+import { initializeDeliveries } from './deliveries.js';
+import { registerServiceWorker } from './service-worker.js';
+initializeState();
+initializeNavigation();
+initializeClients();
+initializeProducts();
+initializeDeliveries();
+initializeBackup();
+initializeBusiness();
+registerServiceWorker();
+render();

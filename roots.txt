@@ -1,0 +1,30 @@
+ctrl<
+    css<
+        styles.css
+    images<
+        ctrl-icon.png
+        ctrl.jpg
+        ctrl.png
+        icon.svg
+    js<
+        app.js
+        backup.js
+        business.js
+        calculations.js
+        clients.js
+        config.js
+        deliveries.js
+        products.js
+        reports.js
+        service-worker.js
+        state.js
+        ui.js
+        utils.js
+        whatsapp.js
+    .gitignore
+    .nojekyll
+    index.html
+    manifest.webmanifest
+    README.md
+    roots.txt - (Éste archivo)
+    sw.js

@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Ctrl+C - Control de Consignaciones",
+  "short_name": "Ctrl+C",
+  "description": "Aplicación para gestionar clientes, productos, entregas en consignación, ventas, devoluciones, pagos y comprobantes por WhatsApp.",
+  "lang": "es-AR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f9",
+  "theme_color": "#1746a2",
+  "categories": [ "business", "productivity" ],
+  "icons": [ { "src": "images/ctrl-icon.png", "sizes": "500x500", "type": "image/png", "purpose": "any maskable" } ]
+}
