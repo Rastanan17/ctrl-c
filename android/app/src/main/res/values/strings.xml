@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ctrl+C</string>
+    <string name="title_activity_main">Ctrl+C</string>
+    <string name="package_name">com.rastanan.ctrlc</string>
+    <string name="custom_url_scheme">com.rastanan.ctrlc</string>
+</resources>

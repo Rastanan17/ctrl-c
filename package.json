@@ -1,0 +1,29 @@
+{
+  "name": "ctrl-c",
+  "version": "1.0.0",
+  "description": "Aplicación web progresiva para gestionar productos entregados en consignación.",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:web": "node scripts/build-web.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rastanan17/ctrl-c.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Rastanan17/ctrl-c/issues"
+  },
+  "homepage": "https://github.com/Rastanan17/ctrl-c#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2"
+  }
+}

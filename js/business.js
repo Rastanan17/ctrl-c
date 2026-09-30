@@ -21,99 +21,35 @@ export function openBusinessModal() {
   openModal(`
     <div class="modal-head">
       <h2>Nombre del emprendimiento</h2>
-      <button type="button" class="close-modal" aria-label="Cerrar">
-        ×
-      </button>
+      <button type="button" class="close-modal" aria-label="Cerrar">×</button>
     </div>
-
     <form id="business-form">
       <div class="field">
-        <label for="business-name-input">
-          Nombre que aparecerá en la aplicación
-        </label>
-
-        <input
-          id="business-name-input"
-          name="businessName"
-          maxlength="60"
-          required
-          autocomplete="organization"
-          placeholder="Ej.: Enrique Budines"
-          value="${escapeHtml(currentName)}"
-        >
-
-        <div class="muted small">
-          Quedará guardado solamente en este dispositivo.
-        </div>
+        <label for="business-name-input">Nombre que aparecerá en la aplicación</label>
+        <input id="business-name-input" name="businessName" maxlength="60" required autocomplete="organization" placeholder="Ej.: Enrique Budines" value="${escapeHtml(currentName)}">
+        <div class="muted small">Quedará guardado solamente en este dispositivo.</div>
       </div>
-
-      <button
-        class="button dark full"
-        type="submit"
-      >
-        Guardar nombre
-      </button>
+      <button class="button dark full" type="submit">Guardar nombre</button>
     </form>
   `);
-
-  const form = document.querySelector(
-    '#business-form'
-  );
-
-  form?.addEventListener(
-    'submit',
-    saveBusinessName
-  );
-
+  const form = document.querySelector('#business-form');
+  form?.addEventListener('submit', saveBusinessName);
   window.setTimeout(() => {
-    document
-      .querySelector('#business-name-input')
-      ?.focus();
+    document.querySelector('#business-name-input') ?.focus();
   }, 50);
 }
-
 function saveBusinessName(event) {
   event.preventDefault();
-
-  const formData = new FormData(
-    event.currentTarget
-  );
-
-  const newName = String(
-    formData.get('businessName') || ''
-  ).trim();
-
-  if (!newName) {
-    toast(
-      'Escribí el nombre del emprendimiento'
-    );
-
-    return;
-  }
-
-  const previousSettings = structuredClone(
-    state.settings || {
-      businessName: ''
-    }
-  );
-
+  const formData = new FormData(event.currentTarget);
+  const newName = String(formData.get('businessName') || '').trim();
+  if (!newName) { toast('Escribí el nombre del emprendimiento'); return; }
+  const previousSettings = structuredClone(state.settings || { businessName: '' });
   state.settings ||= {};
   state.settings.businessName = newName;
-
   if (!saveState()) {
     state.settings = previousSettings;
-
-    toast(
-      'No se pudo guardar el nombre del emprendimiento'
-    );
-
-    return;
+    toast('No se pudo guardar el nombre del emprendimiento'); return;
   }
-
-  updateBusinessHeader();
-  closeModal();
-
-  toast(
-    'Nombre del emprendimiento guardado'
-  );
+  updateBusinessHeader(); closeModal();
+  toast('Nombre del emprendimiento guardado');
 }

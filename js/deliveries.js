@@ -1,72 +1,20 @@
-import {
-  state,
-  clientById,
-  productById,
-  saveState
-} from './state.js';
-
-import {
-  PRICE_STEP,
-  PAYMENT_STEP,
-  DEFAULT_BRAND
-} from './config.js';
-
-import {
-  deliveryTotal,
-  soldTotal,
-  commissionRate,
-  commissionTotal,
-  netSoldTotal,
-  paidTotal,
-  dueTotal,
-  pendingUnits,
-  statusOf
-} from './calculations.js';
-
-import {
-  uid,
-  money,
-  dateTime,
-  escapeHtml,
-  localDateTimeValue
-} from './utils.js';
-
-import {
-  openModal,
-  closeModal,
-  render,
-  toast
-} from './ui.js';
-
-import {
-  sendWhatsApp
-} from './whatsapp.js';
-
+import {state, clientById, productById, saveState} from './state.js';
+import {PRICE_STEP, PAYMENT_STEP, DEFAULT_BRAND} from './config.js';
+import {deliveryTotal, soldTotal, commissionRate, commissionTotal, netSoldTotal, paidTotal, dueTotal, pendingUnits, statusOf} from './calculations.js';
+import {uid, money, dateTime, escapeHtml, localDateTimeValue} from './utils.js';
+import {openModal, closeModal, render, toast} from './ui.js';
+import {sendWhatsApp} from './whatsapp.js';
 let deliveriesInitialized = false;
-
 export let deliveryDraft = createEmptyDraft();
-
 function createEmptyDraft(clientId = '') {
-  return {
-    clientId,
-    date: localDateTimeValue(),
-    notes: '',
-    items: []
-  };
+  return { clientId, date: localDateTimeValue(), notes: '', items: [] };
 }
-
 export function initializeDeliveries() {
   if (deliveriesInitialized) {
     return;
   }
-
   deliveriesInitialized = true;
-
-  document.addEventListener(
-    'click',
-    handleDeliveryClick
-  );
-
+  document.addEventListener('click', handleDeliveryClick);
   document.addEventListener(
     'change',
     handleDeliveryChange
@@ -198,18 +146,26 @@ function handleDeliveryInput(event) {
 }
 
 function handleDeliverySubmit(event) {
-  if (event.target.matches('#delivery-form')) {
+  const form = event.target.closest?.('form');
+
+  if (!form) {
+    return;
+  }
+
+  if (form.id === 'delivery-form') {
     saveDelivery(event);
     return;
   }
 
-  if (event.target.matches('#tracking-form')) {
-    saveTracking(event);
+  event.preventDefault();
+
+  if (form.id === 'tracking-form') {
+    saveTracking(form);
     return;
   }
 
-  if (event.target.matches('#payment-form')) {
-    savePayment(event);
+  if (form.id === 'payment-form') {
+    savePayment(form);
   }
 }
 
@@ -1277,152 +1233,103 @@ export function receiptHtml(delivery) {
   `;
 }
 
-function saveTracking(event) {
-  event.preventDefault();
+function saveTracking(form) {
+  const deliveryId = form.getAttribute('data-delivery-id');
 
-  const deliveryId =
-    event.currentTarget.dataset.deliveryId;
-
-  const delivery = state.deliveries.find(
-    currentDelivery => {
-      return currentDelivery.id === deliveryId;
-    }
-  );
+  if (!deliveryId) {
+    toast('No se pudo identificar la entrega');
+    return;
+  }
+  const delivery = state.deliveries.find(item => {
+    return item.id === deliveryId;
+  });
 
   if (!delivery) {
     toast('No encontramos la entrega');
     return;
   }
 
-  const formData = new FormData(
-    event.currentTarget
-  );
+  const formData = new FormData(form);
 
-  const updates = delivery.items.map(
-    (item, index) => {
-      return {
-        sold: Math.max(
-          0,
-          Number(
-            formData.get(`sold-${index}`)
-          ) || 0
-        ),
+  const updates = delivery.items.map((item, index) => {
+    return {
+      sold: Math.max(
+        0,
+        Number(formData.get(`sold-${index}`)) || 0
+      ),
 
-        returned: Math.max(
-          0,
-          Number(
-            formData.get(`returned-${index}`)
-          ) || 0
-        )
-      };
-    }
-  );
+      returned: Math.max(
+        0,
+        Number(formData.get(`returned-${index}`)) || 0
+      )
+    };
+  });
 
-  const invalidUpdate = updates.some(
-    (update, index) => {
-      return (
-        update.sold +
-        update.returned >
-        Number(
-          delivery.items[index].quantity
-        )
-      );
-    }
-  );
+  const invalidUpdate = updates.some((update, index) => {
+    const quantity = Number(delivery.items[index].quantity) || 0;
+
+    return update.sold + update.returned > quantity;
+  });
 
   if (invalidUpdate) {
-    toast(
-      'Vendido + devuelto supera lo entregado'
-    );
-
+    toast('Vendido + devuelto supera lo entregado');
     return;
   }
 
-  const previousItems = structuredClone(
-    delivery.items
-  );
+  const previousItems = structuredClone(delivery.items);
+  const previousUpdatedAt = delivery.updatedAt;
 
-  updates.forEach(
-    (update, index) => {
-      Object.assign(
-        delivery.items[index],
-        update
-      );
-    }
-  );
+  updates.forEach((update, index) => {
+    Object.assign(delivery.items[index], update);
+  });
 
-  delivery.updatedAt =
-    new Date().toISOString();
+  delivery.updatedAt = new Date().toISOString();
 
   if (!saveState()) {
     delivery.items = previousItems;
+    delivery.updatedAt = previousUpdatedAt;
 
-    toast(
-      'No se pudo guardar el seguimiento'
-    );
-
+    toast('No se pudo guardar el seguimiento');
     return;
   }
 
   closeModal();
   render();
-
   toast('Seguimiento actualizado');
 }
 
-function savePayment(event) {
-  event.preventDefault();
+function savePayment(form) {
+  const deliveryId = form.getAttribute('data-delivery-id');
 
-  const deliveryId =
-    event.currentTarget.dataset.deliveryId;
-
-  const delivery = state.deliveries.find(
-    currentDelivery => {
-      return currentDelivery.id === deliveryId;
-    }
-  );
+  if (!deliveryId) {
+    toast('No se pudo identificar la entrega');
+    return;
+  }
+  const delivery = state.deliveries.find(item => {
+    return item.id === deliveryId;
+  });
 
   if (!delivery) {
     toast('No encontramos la entrega');
     return;
   }
 
-  const formData = new FormData(
-    event.currentTarget
-  );
-
-  const amount = Number(
-    formData.get('amount')
-  ) || 0;
-
-  const pendingAmount = dueTotal(
-    delivery
-  );
+  const formData = new FormData(form);
+  const amount = Number(formData.get('amount')) || 0;
+  const pendingAmount = dueTotal(delivery);
 
   if (netSoldTotal(delivery) <= 0) {
-    toast(
-      'Primero registrá unidades vendidas'
-    );
-
+    toast('Primero registrá unidades vendidas');
     return;
   }
 
   if (pendingAmount <= 0) {
-    toast(
-      'Esta entrega no tiene saldo pendiente'
-    );
-
+    toast('Esta entrega no tiene saldo pendiente');
     return;
   }
 
-  if (
-    amount <= 0 ||
-    amount > pendingAmount
-  ) {
-    toast(
-      `El pago máximo es ${money(pendingAmount)}`
-    );
-
+  if (amount <= 0 || amount > pendingAmount) {
+    toast(`El pago máximo es ${money(pendingAmount)}`);
     return;
   }
 
@@ -1435,87 +1342,31 @@ function savePayment(event) {
   };
 
   delivery.payments.push(payment);
-  delivery.updatedAt =
-    new Date().toISOString();
+  delivery.updatedAt = new Date().toISOString();
 
   if (!saveState()) {
     delivery.payments.pop();
 
-    toast(
-      'No se pudo registrar el pago'
-    );
-
+    toast('No se pudo registrar el pago');
     return;
   }
 
-  /*
-   * Volvemos a abrir el seguimiento actualizado.
-   */
   openTrackingModal(delivery);
-
   render();
-
   toast('Pago registrado');
 }
-
 function deleteDelivery(deliveryId) {
-  const deliveryIndex =
-    state.deliveries.findIndex(
-      delivery => delivery.id === deliveryId
-    );
-
-  if (deliveryIndex < 0) {
-    toast('No encontramos la entrega');
-    return;
+  const deliveryIndex = state.deliveries.findIndex(delivery => delivery.id === deliveryId);
+  if (deliveryIndex < 0) { toast('No encontramos la entrega'); return; }
+  const shouldDelete = window.confirm('¿Eliminar esta entrega y todos sus movimientos?');
+  if (!shouldDelete) { return; }
+  const [deletedDelivery] = state.deliveries.splice(deliveryIndex, 1);
+  if (!saveState()) { state.deliveries.splice(deliveryIndex, 0, deletedDelivery);
+    toast('No se pudo eliminar la entrega'); return;
   }
-
-  const shouldDelete = window.confirm(
-    '¿Eliminar esta entrega y todos sus movimientos?'
-  );
-
-  if (!shouldDelete) {
-    return;
-  }
-
-  const [deletedDelivery] =
-    state.deliveries.splice(
-      deliveryIndex,
-      1
-    );
-
-  if (!saveState()) {
-    state.deliveries.splice(
-      deliveryIndex,
-      0,
-      deletedDelivery
-    );
-
-    toast(
-      'No se pudo eliminar la entrega'
-    );
-
-    return;
-  }
-
-  closeModal();
-  render();
-
-  toast('Entrega eliminada');
+  closeModal(); render(); toast('Entrega eliminada');
 }
-
-function renderProductImage(
-  image,
-  productName,
-  className
-) {
-  const source = image ||
-    'images/ctrl-icon.png';
-
-  return `
-    <img
-      ${className ? `class="${className}"` : ''}
-      src="${escapeHtml(source)}"
-      alt="${escapeHtml(productName)}"
-    >
-  `;
+function renderProductImage(image, productName, className) {
+  const source = image || 'images/ctrl-icon.png';
+  return `<img ${className ? `class="${className}"` : ''} src="${escapeHtml(source)}" alt="${escapeHtml(productName)}">`;
 }

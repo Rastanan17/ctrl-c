@@ -1,4 +1,6 @@
 ctrl<
+    android<
+        
     css<
         styles.css
     images<
@@ -21,10 +23,19 @@ ctrl<
         ui.js
         utils.js
         whatsapp.js
+    node_modules<
+        
+    scripts<
+        build-web.mjs
+    www<
+        
     .gitignore
     .nojekyll
+    capacitor.config.json
     index.html
     manifest.webmanifest
+    package-lock.jsons
+    package.json
     README.md
     roots.txt - (Éste archivo)
     sw.js

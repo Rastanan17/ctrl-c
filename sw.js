@@ -1,14 +1,12 @@
 'use strict';
-
-/*
- * Cada vez que modifiquemos archivos importantes
+/* Cada vez que modifiquemos archivos importantes
  * de la aplicación, aumentaremos esta versión.
  *
  * Ejemplo:
  * ctrl-c-v6
  * ctrl-c-v7
  */
-const CACHE_NAME = 'ctrl-c-v6';
+const CACHE_NAME = 'ctrl-c-v7';
 
 const CACHE_PREFIX = 'ctrl-c-';
 
